@@ -20,14 +20,19 @@
         .anim-pulse-slow {
             animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
-        /* Simple View Switcher */
         .view-section { display: none; }
         .view-section.active { display: block; }
+        
+        /* Drag active state */
+        .drag-active {
+            border-color: #3B82F6 !important; /* Blue-500 */
+            background-color: rgba(30, 41, 59, 0.8) !important; /* Slate-800 */
+        }
     </style>
 </head>
 <body class="bg-slate-900 text-slate-100 font-sans antialiased">
 
-    <!-- TOP ALERT (Global Policy Feed) -->
+    <!-- TOP ALERT -->
     <div class="bg-blue-900/30 border-b border-blue-800 text-xs py-2">
         <div class="container mx-auto px-6 flex justify-between items-center">
             <div class="flex items-center space-x-4">
@@ -59,7 +64,6 @@
 
     <!-- VIEW 1: HOME DASHBOARD -->
     <main id="view-home" class="view-section active">
-        <!-- Hero -->
         <section class="pt-20 pb-32 text-center">
             <div class="container mx-auto px-6">
                 <div class="inline-flex items-center px-3 py-1 rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-400 text-xs font-medium mb-8">
@@ -82,7 +86,6 @@
             </div>
         </section>
 
-        <!-- Stats Dashboard -->
         <section class="container mx-auto px-6 pb-24">
             <div class="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl p-8">
                 <div class="flex justify-between items-end mb-8">
@@ -97,7 +100,6 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <!-- Stat Cards -->
                     <div class="glass-panel p-5 rounded-lg">
                         <div class="text-xs text-slate-500 mb-2">SOURCE MARKET</div>
                         <div class="font-bold text-lg text-white">Curriculum Match</div>
@@ -127,7 +129,7 @@
         </section>
     </main>
 
-    <!-- VIEW 2: STUDENT PORTAL (Hidden by default) -->
+    <!-- VIEW 2: STUDENT PORTAL -->
     <main id="view-student" class="view-section pt-20 pb-20">
         <div class="container mx-auto px-6 flex flex-col items-center">
             <div class="max-w-2xl w-full p-8 glass-panel rounded-2xl text-center">
@@ -135,14 +137,25 @@
                 <p class="text-slate-400 mb-8">Upload your academic transcript to see which global programs match your profile.</p>
 
                 <!-- Upload Zone -->
-                <div id="drop-zone" class="border-2 border-dashed border-slate-600 rounded-xl p-12 hover:border-blue-500 hover:bg-slate-800/50 transition cursor-pointer">
-                    <i data-lucide="upload-cloud" class="w-12 h-12 text-blue-500 mx-auto mb-4"></i>
-                    <h3 class="text-lg font-bold">Upload Transcript (PDF)</h3>
-                    <p class="text-sm text-slate-500 mt-2">Drag & drop or click to browse</p>
+                <div id="drop-zone" class="border-2 border-dashed border-slate-600 rounded-xl p-12 hover:border-blue-500 transition cursor-pointer relative">
+                    <!-- Default State -->
+                    <div id="drop-content">
+                        <i data-lucide="upload-cloud" class="w-12 h-12 text-blue-500 mx-auto mb-4"></i>
+                        <h3 class="text-lg font-bold">Upload Transcript (PDF)</h3>
+                        <p class="text-sm text-slate-500 mt-2">Drag & drop here or click to browse</p>
+                    </div>
+                    
+                    <!-- Loading State (Hidden) -->
+                    <div id="loading-state" class="hidden">
+                        <i data-lucide="loader-2" class="w-12 h-12 text-blue-500 mx-auto animate-spin mb-4"></i>
+                        <h3 class="text-lg font-bold text-blue-400">Analyzing Transcript...</h3>
+                        <p class="text-sm text-slate-500 mt-2">Extracting curriculum vectors</p>
+                    </div>
+
                     <input type="file" id="file-input" class="hidden" accept=".pdf">
                 </div>
 
-                <!-- Analysis Result (Hidden initially) -->
+                <!-- Analysis Result -->
                 <div id="result-area" class="hidden mt-8 text-left bg-slate-800 p-6 rounded-xl border border-slate-700">
                     <div class="flex justify-between items-center mb-6">
                         <h3 class="text-xl font-bold text-emerald-400">Analysis Complete</h3>
@@ -150,19 +163,14 @@
                     </div>
                     
                     <div class="space-y-6">
-                        <!-- Skills Extracted -->
                         <div>
                             <div class="text-xs text-slate-500 uppercase font-bold mb-2">Detected Capabilities</div>
-                            <div class="flex flex-wrap gap-2" id="skills-list">
-                                <!-- JS will populate this -->
-                            </div>
+                            <div class="flex flex-wrap gap-2" id="skills-list"></div>
                         </div>
 
-                        <!-- Matches -->
                         <div>
                             <div class="text-xs text-slate-500 uppercase font-bold mb-3">Best Fit Programs</div>
                             
-                            <!-- Match Card 1 -->
                             <div class="glass-panel p-4 rounded-lg flex justify-between items-center mb-2 hover:bg-slate-700 transition cursor-pointer">
                                 <div>
                                     <div class="font-bold text-white">MSc Data Science</div>
@@ -173,23 +181,6 @@
                                     <div class="text-[10px] text-slate-500">2 Bridge Courses Needed</div>
                                 </div>
                             </div>
-
-                            <!-- Match Card 2 -->
-                            <div class="glass-panel p-4 rounded-lg flex justify-between items-center hover:bg-slate-700 transition cursor-pointer">
-                                <div>
-                                    <div class="font-bold text-white">Post-Grad Cert: AI Systems</div>
-                                    <div class="text-xs text-slate-400">Seneca Polytechnic (Canada)</div>
-                                </div>
-                                <div class="text-right">
-                                    <div class="text-lg font-bold text-blue-400">88% Match</div>
-                                    <div class="text-[10px] text-slate-500">Direct Entry Eligible</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Disclaimer -->
-                        <div class="p-3 bg-amber-900/20 border border-amber-900/50 rounded text-xs text-amber-200/70">
-                            *This is a preliminary AI assessment. Official admission depends on final document verification.
                         </div>
                     </div>
                     
@@ -200,69 +191,77 @@
     </main>
 
     <footer class="bg-slate-950 border-t border-slate-800 py-12 text-center text-slate-500 text-sm">
-        &copy; 2025 Nexus Network. Wired into the economies of Canada, Europe, India, and SE Asia.
+        &copy; 2025 Nexus Network.
     </footer>
 
-    <!-- JAVASCRIPT LOGIC -->
     <script>
-        // 1. Icon Setup
         lucide.createIcons();
 
-        // 2. View Switching Logic
         function switchView(viewName) {
-            // Hide all views
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-            // Show target view
             document.getElementById(`view-${viewName}`).classList.add('active');
-            // Re-render icons just in case
             lucide.createIcons();
         }
 
-        // 3. Mock Data Fetch
         fetch('/api/regulatory-feed')
             .then(res => res.json())
             .then(data => {
                 const ticker = document.getElementById('policy-ticker');
                 if(ticker) ticker.innerText = data.map(i => `${i.country}: ${i.message}`).join(' | ');
             })
-            .catch(err => console.log('Dev Mode: Feed unavailable'));
+            .catch(err => console.log('Feed unavailable'));
 
-        // 4. Student Portal Interaction (Mock Analysis)
+        // --- DRAG AND DROP LOGIC ---
         const dropZone = document.getElementById('drop-zone');
         const fileInput = document.getElementById('file-input');
+        const dropContent = document.getElementById('drop-content');
+        const loadingState = document.getElementById('loading-state');
         const resultArea = document.getElementById('result-area');
         const skillsList = document.getElementById('skills-list');
 
-        if(dropZone) {
-            dropZone.addEventListener('click', () => fileInput.click());
-
-            fileInput.addEventListener('change', (e) => {
-                if(e.target.files.length > 0) {
-                    const fileName = e.target.files[0].name;
-                    // Simulate Loading
-                    dropZone.innerHTML = `
-                        <div class="animate-pulse">
-                            <i data-lucide="loader-2" class="w-10 h-10 text-blue-500 mx-auto animate-spin mb-4"></i>
-                            <div class="text-blue-400 font-bold">Parsing ${fileName}...</div>
-                            <div class="text-xs text-slate-500 mt-2">Extracting grades & curriculum vectors</div>
-                        </div>
-                    `;
-                    lucide.createIcons();
-                    
-                    // Simulate Server Delay (2 seconds)
-                    setTimeout(() => {
-                        dropZone.classList.add('hidden');
-                        resultArea.classList.remove('hidden');
-                        
-                        // Mock Skill Data
-                        const skills = ['Python Programming', 'Linear Algebra', 'Data Visualization (Tableau)', 'Statistical Analysis'];
-                        skillsList.innerHTML = skills.map(s => 
-                            `<span class="px-3 py-1 bg-slate-700 text-slate-200 rounded-full text-xs border border-slate-600 shadow-sm">${s}</span>`
-                        ).join('');
-                    }, 2000);
-                }
-            });
+        function processFile(file) {
+            // Show Loading
+            dropContent.classList.add('hidden');
+            loadingState.classList.remove('hidden');
+            
+            // Simulate 2s delay for AI Processing
+            setTimeout(() => {
+                dropZone.classList.add('hidden'); // Hide the entire upload box
+                resultArea.classList.remove('hidden'); // Show results
+                
+                // Mock Data
+                const skills = ['Python Programming', 'Linear Algebra', 'Data Visualization (Tableau)', 'Statistical Analysis'];
+                skillsList.innerHTML = skills.map(s => 
+                    `<span class="px-3 py-1 bg-slate-700 text-slate-200 rounded-full text-xs border border-slate-600 shadow-sm">${s}</span>`
+                ).join('');
+            }, 2000);
         }
+
+        // 1. Click Handling
+        dropZone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => {
+            if(e.target.files.length > 0) processFile(e.target.files[0]);
+        });
+
+        // 2. Drag Events (The Missing Part)
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault(); // Allows the drop
+            dropZone.classList.add('drag-active');
+        });
+
+        dropZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-active');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-active');
+            
+            if (e.dataTransfer.files.length > 0) {
+                processFile(e.dataTransfer.files[0]);
+            }
+        });
     </script>
 </body>
 </html>
